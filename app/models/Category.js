@@ -1,15 +1,12 @@
 module.exports = (sequelize, Sequelize) => {
-  const Catgories = sequelize.define("Catgories", {
+  const categories = sequelize.define("categories", {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
     },
-    catgoriesName: {
-      type: Sequelize.STRING,
-    },
-    catgoriesPrice: {
+    name: {
       type: Sequelize.STRING,
     },
   });
-  return Catgories;
+  return categories;
 };

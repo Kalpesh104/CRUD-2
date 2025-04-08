@@ -51,7 +51,7 @@ const db1 = mysql
     host: "localhost",
     user: "root",
     password: "root1",
-    database: "kalpesh1",
+    database: "ecommerce",
   })
   .promise(); // <- enables use of await
 
@@ -77,16 +77,20 @@ app.get("/products", async (req, res) => {
     // Search
     const search = req.query.search || "";
     const searchQuery = `%${search}%`;
+    const sortClause = `${mysql.escapeId(sortBy)} ${sortOrder}`;
 
     // Main Query
     const [rows] = await db1.query(
       `
-      SELECT products.*, categories.catgoriesName AS category_name
-      FROM products
-      LEFT JOIN categories ON products.id = categories.id
-      WHERE products.ProductsName LIKE ? OR categories.catgoriesName LIKE ?
-      ORDER BY ${db1.escapeId(sortBy)} ${sortOrder}
-      LIMIT ? OFFSET ?
+      SELECT 
+  products.*, 
+  categories.name AS category_name
+FROM products
+LEFT JOIN categories ON products.categoryId = categories.id
+WHERE products.name LIKE ? OR categories.name LIKE ?
+      ORDER BY ${sortClause}
+
+LIMIT ? OFFSET ?
       `,
       [searchQuery, searchQuery, limit, offset],
     );
@@ -94,10 +98,11 @@ app.get("/products", async (req, res) => {
     // Count query
     const [[{ count }]] = await db1.query(
       `
-      SELECT COUNT(*) AS count
-      FROM products
-      LEFT JOIN categories ON products.id = categories.id
-      WHERE products.ProductsName LIKE ? OR categories.catgoriesName LIKE ?
+    SELECT COUNT(*) AS count
+FROM products
+LEFT JOIN categories ON products.categoryId = categories.id
+WHERE products.name LIKE ? OR categories.name LIKE ?
+
       `,
       [searchQuery, searchQuery],
     );
@@ -115,7 +120,7 @@ app.get("/products", async (req, res) => {
 });
 
 // set port, listen for requests
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
