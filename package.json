@@ -27,5 +27,8 @@
     "jsonwebtoken": "^9.0.0",
     "mysql2": "^2.3.3",
     "sequelize": "^6.31.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
   }
 }

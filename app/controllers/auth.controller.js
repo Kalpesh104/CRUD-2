@@ -16,10 +16,10 @@ exports.signup = async (req, res) => {
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password, 8),
     });
-    if(user) {
+    if (user) {
       const result = user.setRoles([1]);
       if (result) res.send({ message: "User registered successfully!" });
-    }else{
+    } else {
       res.status(500).send({ message: "User not registered!" });
     }
   } catch (error) {
@@ -41,7 +41,7 @@ exports.signin = async (req, res) => {
 
     const passwordIsValid = bcrypt.compareSync(
       req.body.password,
-      user.password
+      user.password,
     );
 
     if (!passwordIsValid) {
@@ -50,13 +50,11 @@ exports.signin = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: user.id },
-                           config.secret,
-                           {
-                            algorithm: 'HS256',
-                            allowInsecureKeySizes: true,
-                            expiresIn: 86400, // 24 hours
-                           });
+    const token = jwt.sign({ id: user.id }, config.secret, {
+      algorithm: "HS256",
+      allowInsecureKeySizes: true,
+      expiresIn: 86400, // 24 hours
+    });
 
     let authorities = [];
     const roles = await user.getRoles();
@@ -81,7 +79,7 @@ exports.signout = async (req, res) => {
   try {
     req.session = null;
     return res.status(200).send({
-      message: "You've been signed out!"
+      message: "You've been signed out!",
     });
   } catch (err) {
     this.next(err);

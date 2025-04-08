@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieSession = require("cookie-session");
 const app = express();
-const mysql = require('mysql2');
+const mysql = require("mysql2");
 app.use(cors());
 
 /* for Angular Client (withCredentials) */
@@ -24,8 +24,8 @@ app.use(
     name: "bezkoder-session",
     keys: ["COOKIE_SECRET"], // should use as secret environment variable
     httpOnly: true,
-    sameSite: 'strict'
-  })
+    sameSite: "strict",
+  }),
 );
 
 // database
@@ -46,27 +46,36 @@ app.get("/", (req, res) => {
 require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
 
-const db1 = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'root1',
-  database: 'kalpesh1'
-}).promise(); // <- enables use of await
+const db1 = mysql
+  .createConnection({
+    host: "localhost",
+    user: "root",
+    password: "root1",
+    database: "kalpesh1",
+  })
+  .promise(); // <- enables use of await
 
 // Example paginated endpoint
-app.get('/products', async (req, res) => {
+app.get("/products", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
     // Sorting
-    const allowedSortFields = ['products.id', 'ProductName', 'ProductPrice', 'catgoriesName'];
-    const sortBy = allowedSortFields.includes(req.query.sortBy) ? req.query.sortBy : 'products.id';
-    const sortOrder = req.query.sort === 'desc' ? 'DESC' : 'ASC';
+    const allowedSortFields = [
+      "products.id",
+      "ProductName",
+      "ProductPrice",
+      "catgoriesName",
+    ];
+    const sortBy = allowedSortFields.includes(req.query.sortBy)
+      ? req.query.sortBy
+      : "products.id";
+    const sortOrder = req.query.sort === "desc" ? "DESC" : "ASC";
 
     // Search
-    const search = req.query.search || '';
+    const search = req.query.search || "";
     const searchQuery = `%${search}%`;
 
     // Main Query
@@ -79,7 +88,7 @@ app.get('/products', async (req, res) => {
       ORDER BY ${db1.escapeId(sortBy)} ${sortOrder}
       LIMIT ? OFFSET ?
       `,
-      [searchQuery, searchQuery, limit, offset]
+      [searchQuery, searchQuery, limit, offset],
     );
 
     // Count query
@@ -90,24 +99,21 @@ app.get('/products', async (req, res) => {
       LEFT JOIN categories ON products.id = categories.id
       WHERE products.ProductsName LIKE ? OR categories.catgoriesName LIKE ?
       `,
-      [searchQuery, searchQuery]
+      [searchQuery, searchQuery],
     );
 
     res.json({
       data: rows,
       currentPage: page,
       totalPages: Math.ceil(count / limit),
-      totalItems: count
+      totalItems: count,
     });
-
   } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-
-  
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
