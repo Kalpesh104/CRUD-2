@@ -4,6 +4,8 @@ const cookieSession = require("cookie-session");
 const app = express();
 const mysql = require("mysql2");
 app.use(cors());
+const ExcelJS = require("exceljs");
+
 
 /* for Angular Client (withCredentials) */
 // app.use(
@@ -116,6 +118,52 @@ WHERE products.name LIKE ? OR categories.name LIKE ?
   } catch (error) {
     console.error("Error fetching products:", error);
     res.status(500).json({ error: "Server error" });
+  }
+});
+app.get("/download-products-report", async (req, res) => {
+  try {
+    // Step 1: Fetch data from MySQL
+    const [rows] = await db1.query(`
+      SELECT 
+        products.id, 
+        products.name AS product_name, 
+        products.price, 
+        categories.name AS category_name
+      FROM products
+      LEFT JOIN categories ON products.categoryId = categories.id
+    `);
+
+    // Step 2: Create workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Products Report");
+
+    // Step 3: Define columns
+    worksheet.columns = [
+      { header: "ID", key: "id", width: 10 },
+      { header: "Product Name", key: "product_name", width: 30 },
+      { header: "Price", key: "price", width: 15 },
+      { header: "Category", key: "category_name", width: 25 },
+    ];
+
+    // Step 4: Add rows
+    worksheet.addRows(rows);
+
+    // Step 5: Set response headers
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=products-report.xlsx"
+    );
+
+    // Step 6: Write to response
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.error("Error generating Excel:", error);
+    res.status(500).json({ error: "Failed to generate Excel report" });
   }
 });
 
