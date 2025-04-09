@@ -122,7 +122,7 @@ app.get("/products", async (req, res) => {
 // Category CRUD
 app.get("/api/catgories", async (req, res) => {
   try {
-    const [rows] = await db1.query("SELECT * FROM catgories");
+    const [rows] = await db1.query("SELECT * FROM categories");
     res.json(rows);
   } catch (err) {
     res.status(500).send(err);
@@ -131,12 +131,12 @@ app.get("/api/catgories", async (req, res) => {
 
 app.post("/api/categories", async (req, res) => {
   try {
-    const { catgoriesName   , catgoriesPrice } = req.body;
+    const { name   , price } = req.body;
     const [result] = await db1.query(
-      "INSERT INTO catgories (catgoriesName , catgoriesPrice ) VALUES (?, ?)",
-      [catgoriesName , catgoriesPrice ]
+      "INSERT INTO categories (name , price ) VALUES (?, ?)",
+      [name , price ]
     );
-    res.status(201).json({ id: result.insertId, catgoriesName, catgoriesPrice });
+    res.status(201).json({ id: result.insertId, name, price });
   } catch (err) {
     res.status(500).send(err);
   }
@@ -145,21 +145,25 @@ app.post("/api/categories", async (req, res) => {
 app.put("/api/categories/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { catgoriesName, catgoriesPrice} = req.body;
+    const { name, price } = req.body;
+
     await db1.query(
-"UPDATE catgories SET catgoriesName = ?, catgoriesPrice = ? WHERE id = ?"
-      [catgoriesName, catgoriesPrice, id]
+      "UPDATE categories SET name = ?, price = ? WHERE id = ?",
+      [name, price, id] // ✅ Corrected
     );
-    res.json({ id, catgoriesName, catgoriesPrice});
+
+    res.json({ id, name, price });
   } catch (err) {
+    console.error("Update error:", err);
     res.status(500).send(err);
   }
 });
 
+
 app.delete("/api/categories/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    await db1.query("DELETE FROM catgories WHERE id = ?", [id]);
+    await db1.query("DELETE FROM categories WHERE id = ?", [id]);
     res.json({ message: `Category ${id} deleted` });
   } catch (err) {
     res.status(500).send(err);
@@ -171,7 +175,7 @@ app.get("/download-products-report", async (req, res) => {
   try {
     // Step 1: Fetch data from MySQL
     const [rows] = await db1.query(`
-      SELECT * from Catgories
+      SELECT * from Categories
     `);
 
     // Step 2: Create workbook and worksheet
@@ -181,8 +185,8 @@ app.get("/download-products-report", async (req, res) => {
     // Step 3: Define columns
     worksheet.columns = [
       { header: "ID", key: "id", width: 10 },
-      { header: "Price", key: "catgoriesPrice", width: 15 },
-      { header: "Category", key: "catgoriesName", width: 25 },
+      { header: "Price", key: "price", width: 15 },
+      { header: "Category", key: "name", width: 25 },
     ];
 
     // Step 4: Add rows
@@ -216,8 +220,8 @@ app.get("/products", async (req, res) => {
     const allowedSortFields = [
       "products.id",
       "ProductName",
-      "ProductPrice",
-      "catgoriesName",
+      "price",
+      "name",
     ];
     const sortBy = allowedSortFields.includes(req.query.sortBy)
       ? req.query.sortBy
@@ -279,10 +283,9 @@ app.post('/upload', upload.single('excelFile'), (req, res) => {
   // Example: insert into a table called 'products'
   data.forEach((row) => {
     console.log(row)
-    const {catgoriesName  , catgoriesPrice } = row;
-
-    const sql = 'INSERT INTO Catgories (catgoriesName, catgoriesPrice) VALUES (?, ?)';
-    db1.query(sql, [catgoriesName , catgoriesPrice], (err) => {
+    const {name  , price } = row;
+    const sql = 'INSERT INTO categories (name, price) VALUES (?, ?)';
+    db1.query(sql, [name , price], (err) => {
       if (err) console.error('Insert error:', err);
     });
   });
