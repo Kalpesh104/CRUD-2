@@ -216,15 +216,7 @@ app.get("/download-catgories-report", async (req, res) => {
   try {
     // Step 1: Fetch product data with category name
     const [rows] = await db1.query(`
-      SELECT 
-        products.name AS Name,
-        products.image AS Image,
-        products.price AS Price,
-        products.uniqueId AS UniqueID,
-        categories.name AS Category
-      FROM products
-      LEFT JOIN categories ON products.categoryId = categories.id
-    `);
+      select * from categories   `);
 
     // Step 2: Create workbook and worksheet
     const workbook = new ExcelJS.Workbook();
@@ -232,11 +224,8 @@ app.get("/download-catgories-report", async (req, res) => {
 
     // Step 3: Define columns
     worksheet.columns = [
-      { header: "Name", key: "Name", width: 30 },
-      { header: "Image", key: "Image", width: 30 },
-      { header: "Price", key: "Price", width: 15 },
-      { header: "Unique ID", key: "UniqueID", width: 25 },
-      { header: "Category", key: "Category", width: 25 },
+      { header: "name", key: "name", width: 30 },
+      { header: "price", key: "price", width: 15 },
     ];
 
     // Step 4: Add rows
