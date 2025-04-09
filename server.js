@@ -175,7 +175,7 @@ app.get("/download-products-report", async (req, res) => {
   try {
     // Step 1: Fetch data from MySQL
     const [rows] = await db1.query(`
-      SELECT * from Categories
+      SELECT * from Products
     `);
 
     // Step 2: Create workbook and worksheet
@@ -423,11 +423,11 @@ app.post('/upload-products', upload.single('excelFile'), async (req, res) => {
   const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
   for (const row of data) {
-    const {Name, Image, Price, CategoryId } = row;
+    const {name , image , price, categoryId } = row;
 
     await db1.query(
-      'INSERT INTO products (uniqueId, name, image, price, categoryId) VALUES (?, ?, ?, ?, ?)',
-      [Name, Image, Price, CategoryId]
+      'INSERT INTO products (name , image, price, categoryId) VALUES (?, ?, ?, ?)',
+      [name, image, price, categoryId]
     );
   }
 
