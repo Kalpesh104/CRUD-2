@@ -23,9 +23,8 @@ db.role = require("./role.model.js")(sequelize, Sequelize);
 // models/index.js
 db.categories = require("./Category.js")(sequelize, Sequelize); // previously Catgories
 db.products = require("./Product.js")(sequelize, Sequelize);
-
-db.categories.hasMany(db.products, { foreignKey: "id" });
-db.products.belongsTo(db.categories, { foreignKey: "id" });
+db.categories.hasMany(db.products, { foreignKey: "categoryId" });
+db.products.belongsTo(db.categories, { foreignKey: "categoryId" });
 
 db.role.belongsToMany(db.user, {
   through: "user_roles",

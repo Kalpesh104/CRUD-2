@@ -2,7 +2,9 @@ module.exports = (sequelize, Sequelize) => {
   const products = sequelize.define("products", {
     id: {
       type: Sequelize.INTEGER,
+      autoIncrement: true,
       primaryKey: true,
+      allowNull: false,
     },
     name: {
       type: Sequelize.STRING,
@@ -12,10 +14,14 @@ module.exports = (sequelize, Sequelize) => {
     },
     price: {
       type: Sequelize.STRING,
-    },
+    }, 
     categoryId: {
-      type: Sequelize.STRING,
-    },
+      type: Sequelize.INTEGER,
+      references: {
+        model: "categories", // table name (not model name)
+        key: "id",
+      },
+    }
   });
   return products;
 };
